@@ -423,7 +423,7 @@ int main() {
 
     startMenu();
 
-    print("Проверка", -1, color::none);
+    
 
     return 0;
 }
