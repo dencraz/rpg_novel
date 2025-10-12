@@ -8,6 +8,9 @@
 #include <limits>
 #include <random>
 using namespace std;
+bool Taverncheck = 0;
+bool Librarycheck = 0;
+bool homecheck = 0;
 
 namespace color {
     const char* none = "\033[0m";
@@ -180,6 +183,7 @@ int city();
 void acthome() {
     system("cls");
     int choice;
+    homecheck = 1;
 
 
     print("Вы зашли к себе домой");
@@ -213,13 +217,14 @@ void acthome() {
             break;
         }
     } while (choice != 0);
-    wait(1);
+    wait(0.5);
     system("cls");
 }
 
 void actLibrary() {
     system("cls");
     int choice;
+    Librarycheck = 1;
 
     print("Вы зашли в тихую библиотеку", -1, color::cyan);
     print("Вы видите там");
@@ -251,16 +256,17 @@ void actLibrary() {
             break;
         }
     } while (choice != 0);
-    wait(1);
+    wait(0.5);
     system("cls");
 }
 
 void actTavern() {
     system("cls");
+    
     int choice;
     bool shouldContinue = true;
     int chance;
-
+    Taverncheck = 1;
     print("Вы зашли в шумную таверну", -1, color::cyan);
     print("Вы видите там");
 
@@ -308,7 +314,7 @@ void actTavern() {
             break;
         case 0:
             print("Вы вышли из таверны", -1, color::blue);
-
+            city();
             break;
         default:
             print("Нет такого варианта ответа", -1, color::bright_red);
@@ -316,7 +322,7 @@ void actTavern() {
         }
     } while (choice != 0);
 
-    wait(1);
+    wait(0.5);
     system("cls");
 }
 
@@ -382,16 +388,48 @@ void menuLocation() {
             break;
         }
     } while (choice != 0);
-    wait(1);
+    wait(0.5);
     system("cls");
 }
+void achievements() {
+    int choice;
 
+    do {
+        system("cls");
+        print("=== ДОСТИЖЕНИЯ ===", 1, color::cyan);
+
+        // Проверяем достижения
+        if (Taverncheck && homecheck && Librarycheck) {
+            print("✓ Посетить все локации - ВЫПОЛНЕНО", textSpeed, color::green);
+        }
+        else {
+            print("✗ Посетить все локации - НЕ ВЫПОЛНЕНО", textSpeed, color::bright_red);
+        }
+
+        print("\n0 - Вернуться в меню", 1, color::red);
+        print("Выберите вариант: ", 1, color::blue);
+
+        choice = rightValue();
+
+        switch (choice) {
+        case 0:
+            print("Возврат в меню...", textSpeed, color::blue);
+            startMenu();
+            break;
+        default:
+            print("Нет такого варианта ответа", textSpeed, color::bright_red);
+            wait(1);
+            break;
+        }
+    } while (choice != 0);
+}
 int startMenu() {
     int choice;
     system("cls");
     print("Добро пожаловать в игру NNNNNN", textSpeed, color:: none);
     print("Начать игру (1)", -1, color::green);
-    print("Настройки (2)");
+    print("Настройки (2)", -1, color::none);
+    print("Достижения (3)", -1, color::none);
     print("Выйти из игры (0)", -1, color::red);
     do {
         choice = rightValue();
@@ -403,6 +441,8 @@ int startMenu() {
         case 2:
             settingsMenu();
             break;
+        case 3:
+            achievements();
         case 0:
             print("Спасибо за игру! До свидания!", 30, color::green);
             wait(1);
@@ -412,7 +452,7 @@ int startMenu() {
             break;
         }
 
-        wait(1);
+        wait(0.5);
     } while (choice != 0);
 
     return 0;
