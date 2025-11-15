@@ -21,7 +21,6 @@ namespace utils {
         const char* cyan = "\033[36m";
         const char* white = "\033[37m";
         const char* bright_red = "\033[91m";
-        const char* gray = " \033[90m";
     }
 
     // Глобальная переменная скорости
