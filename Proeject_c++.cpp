@@ -1,25 +1,28 @@
 ﻿#include <iostream>
-#include <string>
-#include <thread>
-#include <chrono>
-#include <cctype>
 #include <cstdlib>
 #include <ctime>
-#include <limits>
-#include <random>
-
-#include "function.h"
-#include "utils.h"
-using namespace std;
-using namespace utils;
-
+#include "City.h"
+#include "LocationMenu.h"
+#include "MainMenu.h"
 
 int main() {
     setlocale(LC_ALL, "Russian");
 
-    startMenu();
 
-    
+    // Создаём город
+    City city;
+
+    // Создаём меню выбора локаций
+    LocationMenu locationMenu(&city);
+
+    // Устанавливаем обратную связь между City и LocationMenu
+    city.setLocationMenu(&locationMenu);
+
+    // Создаём главное меню
+    MainMenu mainMenu(&locationMenu);
+
+    // Запускаем игру
+    mainMenu.show();
 
     return 0;
 }

@@ -12,6 +12,7 @@ namespace utils {
         extern const char* cyan;
         extern const char* white;
         extern const char* bright_red;
+        extern const char* gray;
     }
 
     namespace TextSpeeds {
