@@ -29,6 +29,8 @@ namespace utils {
     void print(const std::string& text, int time, const char* text_color = color::none);
     void hrprint(const std::string& text, int time, const char* text_color = color::none);
     int random(int min, int max);
+    bool rightName(std::string& name, const std::string& prompt, int minLength, int maxLength);
+
     int rightValue();
 }
 

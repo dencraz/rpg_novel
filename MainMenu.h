@@ -1,9 +1,9 @@
 #pragma once
-
+#include "Player.h"
 
 class LocationMenu;
 
-class MainMenu {
+class MainMenu : protected Player {
 private:
     LocationMenu* locationMenuPtr;
 
@@ -14,6 +14,3 @@ public:
     MainMenu(LocationMenu* locMenu);
     void show();
 };
-
-
-

@@ -2,13 +2,13 @@
 
 #include <string>
 
-class LocationMenu; // Forward declaration
+class LocationMenu; 
 
 class City {
 private:
     LocationMenu* locationMenuPtr;
 
-    // Приватные методы локаций
+   
     void visitHome();
     void visitLibrary();
     void visitTavern();

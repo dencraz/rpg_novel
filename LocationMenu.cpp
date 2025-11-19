@@ -29,7 +29,7 @@ void LocationMenu::show() {
         case 1:
             if (cityPtr) {
                 cityPtr->enter();
-                return; // Выход из show() после возврата из города
+                return; 
             }
             break;
         case 2:
@@ -39,7 +39,7 @@ void LocationMenu::show() {
             print("Возврат в главное меню...", textSpeed, none);
             wait(1);
             if (mainMenuPtr) {
-                mainMenuPtr->show(); // Возврат в главное меню
+                mainMenuPtr->show(); 
             }
             return;
         default:

@@ -1,5 +1,5 @@
 class City;
-class MainMenu; // Forward declaration
+class MainMenu;
 
 class LocationMenu {
 private:

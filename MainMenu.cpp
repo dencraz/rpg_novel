@@ -10,6 +10,7 @@ using namespace std;
 using namespace utils;
 using namespace utils::color;
 
+
 MainMenu::MainMenu(LocationMenu* locMenu) : locationMenuPtr(locMenu) {}
 
 void MainMenu::showSettings() {
@@ -100,11 +101,24 @@ void MainMenu::showAchievements() {
 
 void MainMenu::show() {
     int choice;
+    int choicePlayer;
+    bool playerCreated = false;
+    Player player1;
 
     do {
         system("cls");
         print("Добро пожаловать в игру NNNNNN", textSpeed, none);
-        print("Начать игру (1)", textSpeed, green);
+
+        if (playerCreated == false) {
+            print("Начать игру (1)", textSpeed, green);
+        }
+        else if (playerCreated == true) {
+            print("Продолжить игру (1)", textSpeed, green);
+        }
+        else {
+            cout << "Ошибка";
+        }
+
         print("Настройки (2)", textSpeed, none);
         print("Достижения (3)", textSpeed, none);
         print("Выйти из игры (0)", textSpeed, red);
@@ -112,26 +126,69 @@ void MainMenu::show() {
         choice = rightValue();
 
         switch (choice) {
-        case 1:
+        case 1: {
+            if (!playerCreated) {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                while (!playerCreated) {
+                    system("cls");
+
+                    cout << "=== Создание персонажа ===" << endl;
+                    cout << "1. Ручной ввод данных" << endl;
+                    cout << "2. Случайная генерация" << endl;
+                    cout << "Выберите вариант (1 или 2): " << endl;
+                    choicePlayer = rightValue();
+
+                    switch (choicePlayer) {
+                    case 1: {
+                        player1 = Player::createManual();
+                        playerCreated = true;
+                        break;
+                    }
+
+                    case 2: {
+                        player1 = Player::generateRandom();
+                        playerCreated = true;
+                        break;
+                    }
+
+                    default: {
+                        print("Нет такого варианта ответа", textSpeed, red);
+                        wait(1);
+                        break;
+                    }
+                    }
+                }
+            }
+
             if (locationMenuPtr) {
                 locationMenuPtr->show();
             }
+            else {
+                cout << "Ошибка: меню локаций недоступно" << endl;
+                wait(2);
+            }
             break;
+        }
+
         case 2:
             showSettings();
             break;
+
         case 3:
             showAchievements();
             break;
+
         case 0:
             print("Спасибо за игру! До свидания!", 30, green);
             wait(1);
             return;
+
         default:
             print("Нет такого варианта ответа", textSpeed, red);
+            wait(1);
             break;
         }
 
-        wait(1);
     } while (choice != 0);
 }
+

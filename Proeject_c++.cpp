@@ -21,7 +21,7 @@ int main() {
     // Создаём главное меню
     MainMenu mainMenu(&locationMenu);
 
-    // Запускаем игру
+    // Запуск игры
     mainMenu.show();
 
     return 0;

@@ -44,7 +44,7 @@ void City::visitHome() {
         case 0:
             print("Вы вышли из дома", textSpeed, none);
             wait(1);
-            enter(); // Возвращаемся к выбору зданий
+            enter(); 
             return;
         default:
             print("Вы ничего не сделали", textSpeed, red);
@@ -78,7 +78,7 @@ void City::visitLibrary() {
         case 0:
             print("Вы вышли из библиотеки", textSpeed, none);
             wait(1);
-            enter(); // Возвращаемся к выбору зданий
+            enter(); 
             return;
         default:
             print("Нет такого варианта ответа", textSpeed, red);
@@ -130,7 +130,7 @@ void City::visitTavern() {
         case 0:
             print("Вы вышли из таверны", textSpeed, none);
             wait(1);
-            enter(); // Возвращаемся к выбору зданий
+            enter(); 
             return;
         default:
             print("Нет такого варианта ответа", textSpeed, red);
@@ -179,19 +179,19 @@ void City::enter() {
         case 1:
             wait(1);
             visitLibrary();
-            return; // Выходим из enter() после возврата из библиотеки
+            return; 
         case 2:
             visitHome();
-            return; // Выходим из enter() после возврата из дома
+            return; 
         case 3:
             wait(1);
             visitTavern();
-            return; // Выходим из enter() после возврата из таверны
+            return; 
         case 0:
             print("Вы ушли из города", textSpeed, none);
             wait(1);
             if (locationMenuPtr) {
-                locationMenuPtr->show(); // Возврат к меню выбора локаций
+                locationMenuPtr->show(); 
             }
             return;
         case 666:

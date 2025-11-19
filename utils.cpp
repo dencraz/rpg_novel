@@ -66,11 +66,42 @@ namespace utils {
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             }
             else {
-                std::cin.clear();
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
                 return choice;
             }
         }
     }
+    bool rightName(std::string& name, const std::string& prompt, int minLength, int maxLength) {
+        while (true) {
+            std::cout << prompt;
+            std::getline(std::cin, name);
 
-} 
+            int nameLength = static_cast<int>(name.length());
+
+            if (name.empty() || nameLength < minLength || nameLength > maxLength) {
+                std::cout << "Ошибка! Имя должно содержать от " << minLength
+                    << " до " << maxLength << " символов." << std::endl;
+                continue;
+            }
+
+            bool hasLetter = false;
+            for (char c : name) {
+                if (std::isalpha(static_cast<unsigned char>(c))) {
+                    hasLetter = true;
+                    break;
+                }
+            }
+
+            if (!hasLetter) {
+                std::cout << "Ошибка! Имя должно содержать хотя бы одну букву." << std::endl;
+                continue;
+            }
+
+            return true;
+        }
+    }
+
+
+
+
+}
