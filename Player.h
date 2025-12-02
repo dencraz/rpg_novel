@@ -56,7 +56,7 @@ public:
     void levelUp();
     bool isAlive() const;
     void displayPlayer() const;
-
+    bool openInventoryMenu();
     // Инвентарь
     bool addItem(const Item& item);
     bool removeItem(const std::string& itemName, int quantity);

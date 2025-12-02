@@ -95,7 +95,9 @@ void LocationMenu::show() {
                     print("Вы идете в Заброшенную шахту...", textSpeed, red);
                     print("Здесь пахнет опасностью...", textSpeed, gray);
                     wait(2);
-                    dungeonPtr->enter(); // Запускаем обычный данж (пока без босса)
+
+                    // ВАЖНО: Должен быть вызов enterBossBattle(), а не enter()
+                    dungeonPtr->enterBossBattle();
                 }
             }
             else {
@@ -103,7 +105,6 @@ void LocationMenu::show() {
                 wait(1);
             }
             break;
-
         case 0:
             print("Возврат в главное меню...", textSpeed, cyan);
             wait(1);

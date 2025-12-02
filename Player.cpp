@@ -431,3 +431,119 @@ void Player::showProfile(Player* player) {
         }
     } while (choice != 0);
 }
+bool Player::openInventoryMenu() {
+    // Если инвентарь пуст
+    if (inventory.empty()) {
+        std::cout << red << "Инвентарь пуст!" << none << std::endl;
+        utils::wait(2);
+        return false; // Ход не потрачен
+    }
+
+    int selectedIndex = 0;
+    bool inInventory = true;
+    bool itemUsed = false; // Флаг: использовали ли мы что-то?
+
+    while (inInventory) {
+        system("cls");
+
+        cout << green << "+----------------------------------------------------------+" << none << endl;
+        cout << green << "| HP: " << yellow << getCurrentHP() << "/" << getMaxHP()
+            << green << " | Мана: " << cyan << getCurrentMana() << "/" << getMaxMana()
+            << green << " | Золото: " << yellow << getGold() << green << "                     |" << none << endl;
+        cout << green << "+----------------------------------------------------------+" << none << endl;
+        cout << endl;
+
+        cout << cyan << "+------------------------------------------------------------+" << none << endl;
+        cout << cyan << "|          " << yellow << "ИНВЕНТАРЬ (используйте w/s/e/q)" << cyan
+            << "                  |" << none << endl;
+        cout << cyan << "+------------------------------------------------------------+" << none << endl;
+
+        for (size_t i = 0; i < inventory.size(); ++i) {
+            const auto& item = inventory[i];
+
+            string effect = "";
+            if (item.getHealAmount() > 0) {
+                effect = "HP +" + to_string(item.getHealAmount());
+            }
+            else if (item.getManaAmount() > 0) {
+                effect = "Мана +" + to_string(item.getManaAmount());
+            }
+
+            if (i == selectedIndex) {
+                cout << cyan << "| >> " << green << item.getName()
+                    << yellow << " x" << item.getQuantity()
+                    << magenta << " [" << effect << "]" << cyan;
+            }
+            else {
+                cout << cyan << "|    " << none << item.getName()
+                    << yellow << " x" << item.getQuantity()
+                    << gray << " [" << effect << "]" << cyan;
+            }
+
+            int spaces = 60 - item.getName().length() - to_string(item.getQuantity()).length() - effect.length() - 10;
+            if (spaces < 0) spaces = 0;
+            cout << string(spaces, ' ') << "|" << none << endl;
+        }
+
+        cout << cyan << "+------------------------------------------------------------+" << none << endl;
+        cout << cyan << "| " << yellow << "w/s" << cyan << " - Выбор  |  "
+            << yellow << "e" << cyan << " - Использовать  |  "
+            << yellow << "q" << cyan << " - Закрыть       |" << none << endl;
+        cout << cyan << "+------------------------------------------------------------+" << none << endl;
+
+        cout << "Ваш выбор: ";
+
+        char invKey;
+        cin >> invKey;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        switch (invKey) {
+        case 'w':
+        case 'W':
+            if (selectedIndex > 0) {
+                selectedIndex--;
+            }
+            break;
+
+        case 's':
+        case 'S':
+            if (selectedIndex < inventory.size() - 1) {
+                selectedIndex++;
+            }
+            break;
+
+        case 'e':
+        case 'E':
+            // 1. Используем предмет
+            useItem(selectedIndex);
+
+            // 2. ВАЖНО: Говорим игре, что предмет был использован!
+            itemUsed = true;
+
+            wait(2);
+
+            // 3. Проверки на пустой инвентарь (чтобы не было вылета)
+            if (getInventorySize() == 0) {
+                print("Инвентарь пуст!", textSpeed, yellow);
+                wait(1);
+                inInventory = false;
+            }
+            else if (selectedIndex >= getInventorySize()) {
+                selectedIndex = getInventorySize() - 1;
+            }
+            break;
+
+        case 'q':
+        case 'Q':
+            inInventory = false;
+            break;
+
+        default:
+            print("Неверная клавиша!", textSpeed, red);
+            wait(1);
+            break;
+        }
+    }
+
+    return itemUsed; // Возвращаем true, если потратили ход
+}

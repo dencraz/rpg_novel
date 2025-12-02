@@ -217,118 +217,12 @@ void Dungeon::enter() {
                     }
                     wait(2);
                     break;
-
+                   int turnSpent;
                 case 'e':
                 case 'E':
-                {
-                    const auto& inventory = playerPtr->getInventory();
+                    turnSpent = playerPtr->openInventoryMenu(); // Открывает меню и возвращает true, если выпили зелье
+                    break;
 
-                    if (inventory.empty()) {
-                        print("Инвентарь пуст!", textSpeed, red);
-                        wait(2);
-                        break;
-                    }
-
-                    int selectedIndex = 0;
-                    bool inInventory = true;
-
-                    while (inInventory) {
-                        system("cls");
-
-                        cout << green << "+----------------------------------------------------------+" << none << endl;
-                        cout << green << "| HP: " << yellow << playerPtr->getCurrentHP() << "/" << playerPtr->getMaxHP()
-                            << green << " | Мана: " << cyan << playerPtr->getCurrentMana() << "/" << playerPtr->getMaxMana()
-                            << green << " | Золото: " << yellow << playerPtr->getGold() << green << "                     |" << none << endl;
-                        cout << green << "+----------------------------------------------------------+" << none << endl;
-                        cout << endl;
-
-                        cout << cyan << "+------------------------------------------------------------+" << none << endl;
-                        cout << cyan << "|          " << yellow << "ИНВЕНТАРЬ (используйте w/s/e/q)" << cyan
-                            << "                  |" << none << endl;
-                        cout << cyan << "+------------------------------------------------------------+" << none << endl;
-
-                        for (size_t i = 0; i < inventory.size(); ++i) {
-                            const auto& item = inventory[i];
-
-                            string effect = "";
-                            if (item.getHealAmount() > 0) {
-                                effect = "HP +" + to_string(item.getHealAmount());
-                            }
-                            else if (item.getManaAmount() > 0) {
-                                effect = "Мана +" + to_string(item.getManaAmount());
-                            }
-
-                            if (i == selectedIndex) {
-                                cout << cyan << "| >> " << green << item.getName()
-                                    << yellow << " x" << item.getQuantity()
-                                    << magenta << " [" << effect << "]" << cyan;
-                            }
-                            else {
-                                cout << cyan << "|    " << none << item.getName()
-                                    << yellow << " x" << item.getQuantity()
-                                    << gray << " [" << effect << "]" << cyan;
-                            }
-
-                            int spaces = 60 - item.getName().length() - to_string(item.getQuantity()).length() - effect.length() - 10;
-                            if (spaces < 0) spaces = 0;
-                            cout << string(spaces, ' ') << "|" << none << endl;
-                        }
-
-                        cout << cyan << "+------------------------------------------------------------+" << none << endl;
-                        cout << cyan << "| " << yellow << "w/s" << cyan << " - Выбор  |  "
-                            << yellow << "e" << cyan << " - Использовать  |  "
-                            << yellow << "q" << cyan << " - Закрыть       |" << none << endl;
-                        cout << cyan << "+------------------------------------------------------------+" << none << endl;
-
-                        cout << "Ваш выбор: ";
-
-                        char invKey;
-                        cin >> invKey;
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-                        switch (invKey) {
-                        case 'w':
-                        case 'W':
-                            if (selectedIndex > 0) {
-                                selectedIndex--;
-                            }
-                            break;
-
-                        case 's':
-                        case 'S':
-                            if (selectedIndex < inventory.size() - 1) {
-                                selectedIndex++;
-                            }
-                            break;
-
-                        case 'e':
-                        case 'E':
-                            playerPtr->useItem(selectedIndex);
-                            wait(2);
-
-                            if (playerPtr->getInventorySize() == 0) {
-                                print("Инвентарь пуст!", textSpeed, yellow);
-                                wait(1);
-                                inInventory = false;
-                            }
-                            else if (selectedIndex >= playerPtr->getInventorySize()) {
-                                selectedIndex = playerPtr->getInventorySize() - 1;
-                            }
-                            break;
-
-                        case 'q':
-                        case 'Q':
-                            inInventory = false;
-                            break;
-
-                        default:
-                            print("Неверная клавиша!", textSpeed, red);
-                            wait(1);
-                            break;
-                        }
-                    }
-                }
-                break;
 
                 case 'q':
                 case 'Q':
@@ -416,3 +310,314 @@ void Dungeon::enter() {
         locationMenuPtr->show();
     }
 }
+// ... (предыдущий код) ...
+
+void Dungeon::enterBossBattle() {
+    if (!playerPtr) {
+        cout << red << "Ошибка: игрок не найден!" << none << endl;
+        return;
+    }
+
+    system("cls");
+    // Атмосферное вступление
+    cout << red << "+==========================================================+" << none << endl;
+    cout << red << "| " << yellow << "            ЗАБРОШЕННАЯ ШАХТА - ЛОГОВО БОССА            " << red << "|" << none << endl;
+    cout << red << "+==========================================================+" << none << endl;
+    cout << endl;
+
+    print("Вы входите в огромный подземный зал...", textSpeed, gray);
+    print("Земля дрожит под ногами.", textSpeed, red);
+    print("Из темноты появляются два горящих красных глаза.", textSpeed, bright_red);
+    wait(2);
+    print("\nКАМЕННЫЙ ПОЖИРАТЕЛЬ: 'КТО ПОСМЕЛ НАРУШИТЬ МОЙ СОН?'", textSpeed, yellow);
+    wait(2);
+
+    // Создаем босса: 600 HP, урон 20-40
+    Monster boss(600, "Каменный Пожиратель", 20, 40, "Гигантская тварь из живого камня", true);
+
+    bool inBattle = true;
+    int turnCounter = 0;
+
+    while (inBattle && playerPtr->isAlive() && boss.isAlive()) {
+        turnCounter++;
+        system("cls");
+
+        // ИНТЕРФЕЙС ИГРОКА
+        cout << green << "+----------------------------------------------------------+" << none << endl;
+        cout << green << "| ИГРОК: " << yellow << playerPtr->getName() << green;
+        cout << string(42 - playerPtr->getName().length(), ' ') << "|" << none << endl;
+        cout << green << "| HP: " << yellow << playerPtr->getCurrentHP() << "/" << playerPtr->getMaxHP()
+            << green << " | Мана: " << cyan << playerPtr->getCurrentMana() << "/" << playerPtr->getMaxMana()
+            << green << " | Золото: " << yellow << playerPtr->getGold() << green << "              |" << none << endl;
+        cout << green << "+----------------------------------------------------------+" << none << endl;
+        cout << endl;
+
+        // ИНТЕРФЕЙС БОССА
+        cout << red << "=== БОСС: " << boss.getName() << " ===" << none << endl;
+
+        // Рисуем полоску здоровья босса
+        int hpPercent = (boss.getCurrentHP() * 40) / boss.getMaxHP();
+        cout << "HP: " << red << "[";
+        for (int i = 0; i < 40; ++i) {
+            if (i < hpPercent) cout << "#";
+            else cout << " ";
+        }
+        cout << "] " << boss.getCurrentHP() << "/" << boss.getMaxHP() << none << endl;
+        cout << gray << "Описание: " << boss.getDescription() << none << endl;
+        cout << endl;
+
+        // НОВОЕ МЕНЮ ДЕЙСТВИЙ (W, R, E, Q)
+        cout << cyan << "+------------------------------------------------------+" << none << endl;
+        cout << cyan << "| " << yellow << "[w] Атака" << cyan << "               "
+            << yellow << "[r] Мощный удар (30 маны)" << cyan << " |" << none << endl;
+        cout << cyan << "| " << yellow << "[e] Инвентарь" << cyan << "           "
+            << yellow << "[q] Побег" << cyan << "                 |" << none << endl;
+        cout << cyan << "+------------------------------------------------------+" << none << endl;
+        cout << "Ваш выбор: ";
+
+        char key;
+        cin >> key;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Очистка буфера
+
+        bool turnSpent = false;
+
+        switch (key) {
+        case 'w':
+        case 'W': { // Обычная атака
+            int dmg = utils::random(25, 35) + (playerPtr->getLevel() * 2);
+            boss.takeDamage(dmg);
+            print("Вы атакуете Пожирателя! Урон: " + to_string(dmg), textSpeed, green);
+            turnSpent = true;
+            break;
+        }
+        case 'r':
+        case 'R': { // Мощный удар
+            if (playerPtr->getCurrentMana() >= 30) {
+                playerPtr->useMana(30);
+                int dmg = utils::random(50, 70) + (playerPtr->getLevel() * 3);
+                boss.takeDamage(dmg);
+                print("СОКРУШИТЕЛЬНЫЙ УДАР! Урон: " + to_string(dmg), textSpeed, cyan);
+                turnSpent = true;
+            }
+            else {
+                print("Недостаточно маны!", textSpeed, red);
+                wait(1);
+                turnSpent = false;
+            }
+            break;
+        }
+        case 'e':
+        case 'E':
+        {
+            const auto& inventory = playerPtr->getInventory();
+
+            if (inventory.empty()) {
+                print("Инвентарь пуст!", textSpeed, red);
+                wait(2);
+                turnSpent = false; // Ход не тратится
+                break;
+            }
+
+            int selectedIndex = 0;
+            bool inInventory = true;
+            bool itemUsed = false;
+
+            while (inInventory) {
+                system("cls");
+
+                // Рисуем статус игрока (чтобы не терять контекст)
+                cout << green << "+----------------------------------------------------------+" << none << endl;
+                cout << green << "| HP: " << yellow << playerPtr->getCurrentHP() << "/" << playerPtr->getMaxHP()
+                    << green << " | Мана: " << cyan << playerPtr->getCurrentMana() << "/" << playerPtr->getMaxMana()
+                    << green << " | Золото: " << yellow << playerPtr->getGold() << green << "                     |" << none << endl;
+                cout << green << "+----------------------------------------------------------+" << none << endl;
+                cout << endl;
+
+                cout << cyan << "+------------------------------------------------------------+" << none << endl;
+                cout << cyan << "|          " << yellow << "ИНВЕНТАРЬ (используйте w/s/e/q)" << cyan
+                    << "                  |" << none << endl;
+                cout << cyan << "+------------------------------------------------------------+" << none << endl;
+
+                for (size_t i = 0; i < inventory.size(); ++i) {
+                    const auto& item = inventory[i];
+
+                    string effect = "";
+                    if (item.getHealAmount() > 0) {
+                        effect = "HP +" + to_string(item.getHealAmount());
+                    }
+                    else if (item.getManaAmount() > 0) {
+                        effect = "Мана +" + to_string(item.getManaAmount());
+                    }
+
+                    if (i == selectedIndex) {
+                        cout << cyan << "| >> " << green << item.getName()
+                            << yellow << " x" << item.getQuantity()
+                            << magenta << " [" << effect << "]" << cyan;
+                    }
+                    else {
+                        cout << cyan << "|    " << none << item.getName()
+                            << yellow << " x" << item.getQuantity()
+                            << gray << " [" << effect << "]" << cyan;
+                    }
+
+                    // Выравнивание
+                    int spaces = 60 - item.getName().length() - to_string(item.getQuantity()).length() - effect.length() - 10;
+                    if (spaces < 0) spaces = 0;
+                    cout << string(spaces, ' ') << "|" << none << endl;
+                }
+
+                cout << cyan << "+------------------------------------------------------------+" << none << endl;
+                cout << cyan << "| " << yellow << "w/s" << cyan << " - Выбор  |  "
+                    << yellow << "e" << cyan << " - Использовать  |  "
+                    << yellow << "q" << cyan << " - Закрыть       |" << none << endl;
+                cout << cyan << "+------------------------------------------------------------+" << none << endl;
+
+                cout << "Ваш выбор: ";
+
+                char invKey;
+                cin >> invKey;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                switch (invKey) {
+                case 'w':
+                case 'W':
+                    if (selectedIndex > 0) {
+                        selectedIndex--;
+                    }
+                    break;
+
+                case 's':
+                case 'S':
+                    if (selectedIndex < inventory.size() - 1) {
+                        selectedIndex++;
+                    }
+                    break;
+
+                case 'e':
+                case 'E':
+                    playerPtr->useItem(selectedIndex);
+                    wait(2);
+                    
+
+                    if (playerPtr->getInventorySize() == 0) {
+                        print("Инвентарь пуст!", textSpeed, yellow);
+                        wait(1);
+                        inInventory = false;
+                    }
+                    else if (selectedIndex >= playerPtr->getInventorySize()) {
+                        selectedIndex = playerPtr->getInventorySize() - 1;
+                    }
+                    break;
+
+                case 'q':
+                case 'Q':
+                    inInventory = false;
+                    break;
+
+                default:
+                    // Ничего не делаем или пишем ошибку
+                    break;
+                }
+            }
+
+            // Если использовали предмет, то ход потрачен. Если просто открыли и закрыли — нет.
+            turnSpent = itemUsed;
+            system("cls"); // Очищаем экран перед отрисовкой боя
+        }
+        break;
+
+        case 'q':
+        case 'Q': { // Побег
+            if (utils::random(1, 100) <= 5) { // Шанс сбежать от босса очень мал (5%)
+                print("Вам чудом удалось улизнуть!", textSpeed, green);
+                inBattle = false;
+                wait(2);
+                return;
+            }
+            else {
+                print("Пожиратель перекрывает выход! Бежать некуда!", textSpeed, red);
+                turnSpent = true; // Попытка побега тратит ход
+            }
+            break;
+        }
+        default:
+            print("Используйте W, R, E или Q!", textSpeed, red);
+            wait(1);
+            break;
+        }
+
+        if (!turnSpent) continue;
+
+        // Проверка победы
+        if (!boss.isAlive()) {
+            inBattle = false;
+            break;
+        }
+
+        wait(1);
+        cout << endl;
+
+        // ХОД БОССА (AI)
+        if (turnCounter % 4 == 0) {
+            // Спец-атака: Камнепад
+            print("Пожиратель вызывает КАМНЕПАД!", textSpeed, magenta);
+            int dmg = utils::random(40, 60);
+            playerPtr->takeDamage(dmg);
+            print("Вас завалило камнями! Урон: " + to_string(dmg), textSpeed, red);
+        }
+        else if (boss.getCurrentHP() < 200 && utils::random(1, 100) <= 30) {
+            // Лечение
+            print("Пожиратель восстанавливает каменную броню...", textSpeed, yellow);
+            boss.heal(50);
+            print("Босс восстановил 50 HP!", textSpeed, green);
+        }
+        else {
+            // Обычная атака
+            int dmg = boss.getDamage();
+            playerPtr->takeDamage(dmg);
+            print("Пожиратель бьет вас! Урон: " + to_string(dmg), textSpeed, red);
+        }
+
+        if (!playerPtr->isAlive()) {
+            print("В глазах темнеет...", textSpeed, red);
+            wait(2);
+            break;
+        }
+        wait(2);
+    }
+
+    // ИТОГИ
+    system("cls");
+    if (playerPtr->isAlive()) {
+        cout << yellow << R"(
+             _    _  _____  _____  _____  _____  _____  __   __
+            | |  | ||_   _||  __ \|_   _||  _  ||  _  | \ \ / /
+            | |  | |  | |  | |  \/  | |  | | | || | | |  \ V / 
+            | |/\| |  | |  | | __   | |  | | | || | | |   \ /  
+            \  /\  / _| |_ | |_\ \  | |  \ \_/ /\ \_/ /   | |  
+             \/  \/  \___/  \____/  \_/   \___/  \___/    \_/  
+        )" << none << endl;
+        print("ПОБЕДА! Каменный Пожиратель повержен!", textSpeed, green);
+        print("Вы получаете 2000 золота и вечную славу!", textSpeed, yellow);
+        playerPtr->addGold(2000);
+        wait(3);
+    }
+    else {
+        cout << red << R"(
+              _____   ___  ___  ___  _____   _____  _   _  _____  ______ 
+             |  __ \ / _ \ |  \/  | |  ___| |  _  || | | ||  ___| | ___ \
+             | |  \// /_\ \| .  . | | |__   | | | || | | || |__   | |_/ /
+             | | __ |  _  || |\/| | |  __|  | | | || | | ||  __|  |    / 
+             | |_\ \| | | || |  | | | |___  \ \_/ /\ \_/ /| |___  | |\ \ 
+              \____/\_| |_/\_|  |_/ \____/   \___/  \___/ \____/  \_| \_|
+        )" << none << endl;
+        print("Вы погиб в бою с древним злом...", textSpeed, red);
+        playerPtr->setCurrentHP(playerPtr->getMaxHP()); // Воскрешение
+        playerPtr->setGold(playerPtr->getGold() / 2);   // Штраф
+        wait(3);
+    }
+
+    if (locationMenuPtr) locationMenuPtr->show();
+}
+
+

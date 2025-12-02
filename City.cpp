@@ -424,15 +424,18 @@ void City::visitLibrary() {
         }
     } while (choice != 0);
 }
-
 void City::visitTavern() {
+    
+    
+    
+
     if (!playerPtr) {
         print("Ошибка: игрок не найден!", textSpeed, red);
         wait(2);
         return;
     }
 
-    // Начальное предупреждение
+    // Начальное предупреждение (остается как было)
     if (playerPtr->getAge() < 18) {
         system("cls");
         cout << red << "+----------------------------------------------------------+" << none << endl;
@@ -446,20 +449,27 @@ void City::visitTavern() {
     }
 
     int choice;
-    int underageGamblingAttempts = 0; // Счетчик попыток сыграть для несовершеннолетних
+    int underageGamblingAttempts = 0;
+    int drinksCount = 0;
+    bool firstTimeRobot = true; // Флаг для первого знакомства с роботом
+    int robotAnnoyance = 0;
 
     do {
         system("cls");
         cout << cyan << "+----------------------------------------------------------+" << none << endl;
         cout << cyan << "|" << yellow << "                   *** ТАВЕРНА ***                       " << cyan << "|" << none << endl;
         cout << cyan << "+----------------------------------------------------------+" << none << endl;
-        cout << cyan << "|" << gray << "  Шумное место, полное веселья и азартных игр...          " << cyan << "|" << none << endl;
+        cout << cyan << "|" << gray << "  Шумное место. В углу стоит странная фигура...           " << cyan << "|" << none << endl;
         cout << cyan << "+----------------------------------------------------------+" << none << endl;
-        cout << cyan << "| " << green << "[1]" << cyan << " Купить эль (восстановить 20 HP) - " << yellow << "30 золота" << string(9, ' ') << cyan << "|" << none << endl;
-        cout << cyan << "| " << green << "[2]" << cyan << " Поговорить с барменом (слухи и сплетни)" << string(15, ' ') << "|" << none << endl;
-        cout << cyan << "| " << green << "[3]" << cyan << " Послушать музыкантов (восстановить ману)" << string(13, ' ') << "|" << none << endl;
-        cout << cyan << "| " << yellow << "[4]" << cyan << " Игра в кости - Испытать удачу! - " << yellow << "50 золота" << string(9, ' ') << cyan << "|" << none << endl;
-        cout << cyan << "| " << gray << "[5]" << cyan << " Поговорить со старым шахтёром" << string(24, ' ') << "|" << none << endl;
+
+        // МЕНЮ
+        cout << cyan << "| " << green << "[1]" << cyan << " Купить эль (20 HP) - " << yellow << "30 золота" << string(15, ' ') << cyan << "|" << none << endl;
+        cout << cyan << "| " << green << "[2]" << cyan << " Поговорить с барменом" << string(26, ' ') << "|" << none << endl;
+        cout << cyan << "| " << green << "[3]" << cyan << " Послушать музыкантов (маны)" << string(20, ' ') << "|" << none << endl;
+        cout << cyan << "| " << yellow << "[4]" << cyan << " Игра в кости - " << yellow << "50 золота" << string(20, ' ') << cyan << "|" << none << endl;
+        cout << cyan << "| " << gray << "[5]" << cyan << " Поговорить со старым шахтёром" << string(18, ' ') << "|" << none << endl;
+        cout << cyan << "| " << magenta << "[6]" << cyan << " Подойти к странному роботу" << string(21, ' ') << "|" << none << endl; // НОВЫЙ ПУНКТ
+
         cout << cyan << "+----------------------------------------------------------+" << none << endl;
         cout << cyan << "| " << red << "[0]" << cyan << " Выйти из таверны" << string(37, ' ') << "|" << none << endl;
         cout << cyan << "+----------------------------------------------------------+" << none << endl;
@@ -469,20 +479,43 @@ void City::visitTavern() {
 
         switch (choice) {
         case 1:
+            // ЛОГИКА АЛКОГОЛЯ (без изменений)
             if (playerPtr->getAge() < 18) {
                 print("Бармен качает головой:", textSpeed, red);
                 print("'Нет-нет! Тебе ещё рано пить эль, малыш!'", textSpeed, bright_red);
                 print("'Держи лучше яблочный сок... Бесплатно.'", textSpeed, yellow);
                 playerPtr->heal(10);
                 print("Вы выпили сок и восстановили 10 HP", textSpeed, green);
-                print("Текущее HP: " + to_string(playerPtr->getCurrentHP()) + "/" + to_string(playerPtr->getMaxHP()), textSpeed, yellow);
             }
             else {
                 if (playerPtr->getGold() >= 30) {
                     playerPtr->spendGold(30);
                     playerPtr->heal(20);
+                    drinksCount++;
                     print("Вы выпили пенного эля и восстановили 20 HP!", textSpeed, green);
-                    print("Текущее HP: " + to_string(playerPtr->getCurrentHP()) + "/" + to_string(playerPtr->getMaxHP()), textSpeed, yellow);
+                    if (drinksCount >= 5) {
+                        wait(1);
+                        print("В глазах начинает двоиться...", textSpeed, red);
+                        wait(1);
+                        print("Вы чувствуете, как пол уходит из-под ног...", textSpeed, bright_red);
+                        wait(2);
+                        system("cls");
+                        print("Вы потеряли сознание от алкогольного отравления!", textSpeed, red);
+                        if (utils::random(1, 100) <= 10) {
+                            playerPtr->setCurrentHP(0);
+                            print("*** ВЫ ПОГИБЛИ ОТ АЛКОГОЛЯ ***", textSpeed, red);
+                            wait(3);
+                            return;
+                        }
+                        else {
+                            print("Вы просыпаетесь на следующий день с ужасной головной болью...", textSpeed, gray);
+                            playerPtr->setCurrentHP(1);
+                            playerPtr->setCurrentMana(0);
+                            print("HP упало до 1. Мана истощена.", textSpeed, red);
+                            wait(3);
+                            return;
+                        }
+                    }
                 }
                 else {
                     print("Недостаточно золота!", textSpeed, red);
@@ -492,65 +525,40 @@ void City::visitTavern() {
             break;
 
         case 2: {
+            // БАРМЕН (без изменений)
             int chance = random(1, 100);
-            if (chance < 30) {
-                print("Бармен таинственно шепчет:", textSpeed, magenta);
-                print("'Слышал, в пещере появился редкий монстр!'", textSpeed, yellow);
-                print("'Говорят, он охраняет несметные сокровища...'", textSpeed, yellow);
-            }
-            else if (chance < 60) {
-                print("Бармен рассказывает:", textSpeed, magenta);
-                print("'В библиотеке можно улучшить свои навыки за золото.'", textSpeed, cyan);
-            }
-            else {
-                print("Бармен делится новостями:", textSpeed, magenta);
-                print("'Торговец получил новую партию зелий. Цены не низкие!'", textSpeed, gray);
-            }
+            if (chance < 30) print("Бармен: 'Слышал, в пещере появился редкий монстр!'", textSpeed, yellow);
+            else if (chance < 60) print("Бармен: 'В библиотеке можно улучшить навыки.'", textSpeed, cyan);
+            else print("Бармен: 'Торговец привез новые зелья.'", textSpeed, gray);
             wait(3);
             break;
         }
 
         case 3:
+            // МУЗЫКАНТЫ (без изменений)
             print("Вы слушаете красивую мелодию менестреля...", textSpeed, cyan);
             playerPtr->restoreMana(30);
-            print("Восстановлено 30 маны! Текущая мана: " + to_string(playerPtr->getCurrentMana()), textSpeed, green);
+            print("Восстановлено 30 маны!", textSpeed, green);
             wait(3);
             break;
 
         case 4:
+            // АЗАРТНЫЕ ИГРЫ (без изменений)
             if (playerPtr->getAge() < 18) {
-                // Увеличиваем счетчик попыток
                 underageGamblingAttempts++;
-
-                // Если попыток 5 или больше - выкидываем
                 if (underageGamblingAttempts >= 5) {
+                    // ... логика вышибалы ...
                     system("cls");
-                    print("Бармен бьет кружкой по столу, его лицо краснеет от гнева:", textSpeed, red);
-                    print("'ВСЁ! МОЁ ТЕРПЕНИЕ ЛОПНУЛО!'", textSpeed, bright_red);
-                    print("'Я же сказал - пошел вон отсюда, щенок!'", textSpeed, bright_red);
-                    wait(2);
-                    print("Охранник хватает вас за шиворот и вышвыривает на улицу.", textSpeed, gray);
-                    print("Вы больно ударились о брусчатку.", textSpeed, yellow);
-                    playerPtr->takeDamage(5); // Небольшой урон за вылет
-                    print("Получено 5 урона.", textSpeed, red);
+                    print("Бармен: 'ВСЁ! МОЁ ТЕРПЕНИЕ ЛОПНУЛО!'", textSpeed, bright_red);
+                    print("Охранник вышвыривает вас.", textSpeed, gray);
+                    playerPtr->takeDamage(5);
                     wait(3);
-                    return; // ПРИНУДИТЕЛЬНЫЙ ВЫХОД ИЗ ТАВЕРНЫ
+                    return;
                 }
-
-                // Обычное предупреждение (если попыток < 5)
-                print("Бармен строго смотрит на вас:", textSpeed, red);
-
-                if (underageGamblingAttempts == 4) {
-                    print("'Это последнее предупреждение! Ещё раз спросишь - вылетишь отсюда!'", textSpeed, bright_red);
-                }
-                else {
-                    print("'Я же сказал - никаких азартных игр!'", textSpeed, bright_red);
-                    print("'Ты слишком молод для этого!'", textSpeed, yellow);
-                }
-                wait(3);
+                print("Бармен: 'Я же сказал - никаких азартных игр!'", textSpeed, bright_red);
+                wait(1);
             }
             else {
-                // Логика для взрослых (18+)
                 if (playerPtr->getGold() >= 50) {
                     playerPtr->spendGold(50);
                     if (diceGame()) {
@@ -563,7 +571,7 @@ void City::visitTavern() {
                     }
                 }
                 else {
-                    print("Нужно 50 золота для игры!", textSpeed, red);
+                    print("Нужно 50 золота!", textSpeed, red);
                 }
                 wait(3);
             }
@@ -572,6 +580,109 @@ void City::visitTavern() {
         case 5:
             talkToMiner();
             break;
+
+        case 6: {
+            // ==================== РОБОТ (УЗИ) ====================
+            system("cls");
+            if (firstTimeRobot) {
+                cout << magenta << "+==========================================================+" << none << endl;
+                cout << magenta << "|" << yellow << "                СТРАННЫЙ ДРОН-РАБОЧИЙ                     " << magenta << "|" << none << endl;
+                cout << magenta << "+==========================================================+" << none << endl;
+                cout << endl;
+                print("Перед вами стоит робот необычно низкого роста, меньше полутора метров.", textSpeed, gray);
+                print("У неё фиолетовое каре и черный дисплей вместо лица с ярко-фиолетовыми", textSpeed, gray);
+                print("цифровыми глазами. На голове шапка с бубоном.", textSpeed, gray);
+                print("Одета в черную толстовку с принтом батарейки и костей.", textSpeed, gray);
+                wait(3);
+                cout << endl;
+                print("За спиной у неё висит массивный футуристический рельсотрон с зеленым свечением.", textSpeed, magenta);
+                print("На шее чокер с номером '002'.", textSpeed, magenta);
+                wait(2);
+                firstTimeRobot = false;
+            }
+
+            // Логика раздражения
+            robotAnnoyance++;
+
+            if (robotAnnoyance == 4) {
+                // ПРЕДУПРЕЖДЕНИЕ
+                cout << endl;
+                cout << magenta << "Робот [002]: " << none;
+                print("'Еще один косой взгляд, и я стреляю!'", textSpeed, bright_red);
+                print("Она срывает рельсотрон со спины и наводит прямо вам в лицо.", textSpeed, red);
+                print("Зеленый свет в дуле начинает накапливаться с угрожающим гулом...", textSpeed, yellow);
+                wait(4);
+            }
+            else if (robotAnnoyance >= 5) {
+                // ВЫСТРЕЛ И СМЕРТЬ
+                cout << endl;
+                cout << magenta << "Робот [002]: " << none;
+                print("'А может ты выкусишь?!'", textSpeed, bright_red);
+                wait(1);
+                print("ВСПЫШКА ЗЕЛЕНОГО СВЕТА ОСЛЕПЛЯЕТ ВАС...", textSpeed, green);
+                wait(2);
+
+                system("cls");
+                cout << magenta<< R"(
+                        .|                        
+                        ##.                       
+                       =###.                      
+                      |#####.                     
+                     |######=                     
+                      ""##/".                     
+                        |#                        
+                        |#                        
+                        |#                        
+                        =#                        
+                       .##_                       
+                    _=/\_//\=_.                   
+                  =//_######|_/#                  
+                  #.##########|#                  
+                  #.##########|#                  
+                 .#.########=#|#.                 
+               _=##\_/\####/"_:=##_               
+      __.   _=#""    "\:___/".   ""=#_.   __.     
+    .=###==/".          "".          ""==####_    
+   _######=                            .######=.  
+ .=#######=                            |=#######_ 
+ :""" .                                     ..""".
+                 )" << none << endl;
+
+                wait(2);
+                print("ВЫ УМЕРЛИ ОТ ВЫСТРЕЛА РЕЛЬСОТРОНА.", textSpeed, red);
+                print("От таверны (и от вас) ничего не осталось...", textSpeed, gray);
+
+                // Сброс персонажа (смерть)
+                playerPtr->setCurrentHP(playerPtr->getMaxHP());
+                playerPtr->setGold(0); // Теряет всё золото
+                wait(5);
+                return; // Вылет из таверны
+            }
+            else {
+                // ОБЫЧНЫЕ РЕПЛИКИ (1-3 раз)
+                cout << endl;
+                cout << magenta << "Робот [002]: " << none;
+                int reply = random(1, 3);
+                switch (reply) {
+                case 1:
+                    print("'Чего тебе?! Да я сама понятия не имею, что я тут делаю!'", textSpeed, yellow);
+                    break;
+                case 2:
+                    print("'Не пялься так. Бесишь! Как и все здесь...'", textSpeed, red);
+                    break;
+                case 3:
+                    print("'Ну и дыра... Эй, ты тут случаем не видел посадочную капсулу?'", textSpeed, cyan);
+                    break;
+                }
+                // С шансом добавляет фразу про "БЕСИТ"
+                if (random(1, 100) <= 30) {
+                    print("'КАК ЖЕ ВСЕ БЕСИИИИТ!!'", textSpeed, bright_red);
+                }
+                wait(3);
+            }
+            break;
+        }
+
 
         case 0:
             print("Вы вышли из таверны", textSpeed, none);
@@ -585,6 +696,8 @@ void City::visitTavern() {
         }
     } while (choice != 0);
 }
+
+
 
 
 void City::visitShop() {
