@@ -66,11 +66,11 @@ namespace utils {
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             }
             else {
-
-                return choice;
+                return choice;  
             }
         }
     }
+
     bool rightName(std::string& name, const std::string& prompt, int minLength, int maxLength) {
         while (true) {
             std::cout << prompt;
@@ -100,8 +100,4 @@ namespace utils {
             return true;
         }
     }
-
-
-
-
 }

@@ -1,16 +1,23 @@
 #pragma once
-#include "Player.h"
+#include <string>
 
 class LocationMenu;
+class Player;
 
-class MainMenu : protected Player {
+class MainMenu {
 private:
     LocationMenu* locationMenuPtr;
+    Player* currentPlayer;
+    Player* playerPtr;
 
     void showSettings();
-    void showAchievements();
+    
+   
+    void showStoryIntro(const std::string& playerName);
 
 public:
     MainMenu(LocationMenu* locMenu);
-    void show();
+    int show();
+    Player* getCurrentPlayer() { return currentPlayer; }
+    
 };

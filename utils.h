@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 
 namespace utils {
@@ -33,4 +34,3 @@ namespace utils {
 
     int rightValue();
 }
-
